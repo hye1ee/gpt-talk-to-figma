@@ -6,7 +6,7 @@ This project enables **Figma plugins** to communicate with a **local server** th
 
 ---
 
-## 1. Initial Setup
+## 1. Initial Setup 📝
 
 1. **Install dependencies:**
    ```bash
@@ -22,7 +22,7 @@ This project enables **Figma plugins** to communicate with a **local server** th
 
 ---
 
-## 2. Install the Figma Plugin
+## 2. Install the Figma Plugin 🎨
 
 1. Open **Figma**
 2. Go to **Plugins > Development > Import plugin from manifest**
@@ -33,7 +33,7 @@ This project enables **Figma plugins** to communicate with a **local server** th
 
 ---
 
-## 3. Run the Socket Server
+## 3. Run the Socket Server 🔌
 
 Start the WebSocket server (handles communication between Figma plugin and GPT server):
 
@@ -41,19 +41,27 @@ Start the WebSocket server (handles communication between Figma plugin and GPT s
 npm run socket
 ```
 
+**After opening the socket server, please make sure that your Figma plugin connects to this socket server first before opening the GPT server.**
+
+- If you connect correctly, you will get the channel value in the connection tab of the plugin. **Remember this value.**
+
 ---
 
-## 4. Run the GPT Server
+## 4. Run the GPT Server 🤖
 
-Start the GPT server (handles requests to the GPT API):
+Start the GPT server (handles requests to the GPT API) and connect it to the channel you obtained from the previous step:
 
 ```bash
-npm run server
+npm run server -- --channel=<channel_value_from_plugin>
 ```
+
+- The GPT server will automatically connect to the socket server and the channel that you specify in the command.
+- Replace `<channel_value_from_plugin>` with the channel value you got from the Figma plugin's connection tab.
+- If not specified, the default channel is `llm`, but you should use the value shown in the plugin for correct communication.
 
 ---
 
-## Notes
+## Notes 💡
 
 - All servers must be running **locally** for the system to work.
 - You can change the socket port by editing the `PORT` variable in `src/socket.ts` and updating your `.env` if needed.

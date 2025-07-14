@@ -9,6 +9,14 @@ const SOCKET_SERVER_URL = `ws://localhost:${SOCKET_PORT}`;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
+// Parse --channel argument from process.argv
+let channelArg = "llm";
+process.argv.forEach((arg) => {
+  if (arg.startsWith("--channel=")) {
+    channelArg = arg.split("=")[1] || "llm";
+  }
+});
+
 // Logging utility
 const logger = {
   info: (msg: string) => console.log(`[INFO] ${msg}`),
@@ -28,14 +36,14 @@ function connectToSocketServer() {
 
   ws.on("open", () => {
     logger.info("Connected to socket server");
-    joinChannel("llm");
+    joinChannel(channelArg);
   });
 
   ws.on("message", async (data) => {
     try {
       const msg = JSON.parse(data.toString());
       logger.info(`Received message: ${JSON.stringify(msg)}`);
-      if (msg.type === "message" && msg.message) {
+      if (msg.type === "broadcast" && msg.message && msg.sender === "User") {
         // Send to GPT and return answer
         let gptAnswer = "[No answer]";
         try {

@@ -77,9 +77,12 @@
         &:hover {
           outline: none;
         }
-
         &:active {
           outline: none;
+        }
+        &:focus {
+          outline: none;
+          background-color: white;
         }
       }
       label {
@@ -90,7 +93,6 @@
         color: #444;
       }
       .status {
-        margin-top: 16px;
         padding: 12px;
         border-radius: 6px;
         font-size: 14px;
@@ -205,16 +207,14 @@
       .chat-message.sent {
         background: #e6f4fe;
         border-color: #0b99ff;
-        margin-left: auto;
-        margin-right: 0;
+        justify-self: flex-end;
         text-align: right;
         color: #222;
       }
       .chat-message.received {
         background: #fff;
         border-color: #e0e0e0;
-        margin-right: auto;
-        margin-left: 0;
+        justify-self: flex-start;
         text-align: left;
         color: #222;
       }
@@ -283,12 +283,6 @@
 
         <div id="connection-status" class="status disconnected">
           Not connected to socket server
-        </div>
-
-        <div class="section">
-          <button id="btn-disconnect" class="secondary" disabled>
-            Disconnect
-          </button>
         </div>
 
         <!-- Add Progress Bar Section -->
@@ -386,7 +380,6 @@
       // UI Elements
       const portInput = document.getElementById("port");
       const connectButton = document.getElementById("btn-connect");
-      const disconnectButton = document.getElementById("btn-disconnect");
       const connectionStatus = document.getElementById("connection-status");
 
       // Tabs
@@ -412,9 +405,16 @@
           isConnected ? "connected" : "disconnected"
         }`;
 
-        connectButton.disabled = isConnected;
-        disconnectButton.disabled = !isConnected;
         portInput.disabled = isConnected;
+        if (isConnected) {
+          connectButton.textContent = "Disconnect";
+          connectButton.classList.remove("primary");
+          connectButton.classList.add("secondary");
+        } else {
+          connectButton.textContent = "Connect";
+          connectButton.classList.remove("secondary");
+          connectButton.classList.add("primary");
+        }
       }
 
       // Connect to WebSocket server
@@ -448,29 +448,36 @@
               const data = JSON.parse(event.data);
               console.log("Received message:", data);
 
-              // Show all received messages in the chat log
+              // Show only 'message' entity in the chat log, and align by sender
               const chatMessages = document.getElementById("chat-messages");
-              if (chatMessages) {
-                const msgDiv = document.createElement("div");
-                let isSent = false;
-                // Try to parse as chat message and style accordingly
-                if (data.type === "chat" && data.message) {
-                  if (data.message.sender === "You") {
+              if (
+                chatMessages &&
+                (data.type === "broadcast" || data.type === "message")
+              ) {
+                // Only show if data.message exists
+                if (data.message) {
+                  const msgDiv = document.createElement("div");
+                  // If message is an object with sender, use that, else treat as string
+                  if (data.sender === "You") {
                     msgDiv.className = "chat-message sent";
-                    isSent = true;
-                    msgDiv.textContent = data.message.text;
+                    msgDiv.textContent = data.message;
                   } else {
                     msgDiv.className = "chat-message received";
-                    msgDiv.textContent =
-                      (data.message.sender ? data.message.sender + ": " : "") +
-                      data.message.text;
+                    msgDiv.textContent = data.message;
                   }
-                } else {
-                  msgDiv.className = "chat-message received";
-                  msgDiv.textContent = JSON.stringify(data);
+
+                  chatMessages.appendChild(msgDiv);
+                  chatMessages.scrollTop = chatMessages.scrollHeight;
                 }
-                chatMessages.appendChild(msgDiv);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+              }
+
+              // Also show all received messages in the debug-messages section
+              const debugMessages = document.getElementById("debug-messages");
+              if (debugMessages) {
+                const debugDiv = document.createElement("div");
+                debugDiv.textContent = `[RECV] ${JSON.stringify(data)}`;
+                debugMessages.appendChild(debugDiv);
+                debugMessages.scrollTop = debugMessages.scrollHeight;
               }
 
               if (data.type === "system") {
@@ -696,19 +703,18 @@
         });
       });
 
-      // Connect to server
+      // Connect/Disconnect toggle button
       connectButton.addEventListener("click", () => {
-        const port = parseInt(portInput.value, 10) || 3055;
-        updateConnectionStatus(false, "Connecting...");
-        connectionStatus.className = "status info";
-        connectToServer(port);
-      });
-
-      // Disconnect from server
-      disconnectButton.addEventListener("click", () => {
-        updateConnectionStatus(false, "Disconnecting...");
-        connectionStatus.className = "status info";
-        disconnectFromServer();
+        if (!state.connected) {
+          const port = parseInt(portInput.value, 10) || 3055;
+          updateConnectionStatus(false, "Connecting...");
+          connectionStatus.className = "status info";
+          connectToServer(port);
+        } else {
+          updateConnectionStatus(false, "Disconnecting...");
+          connectionStatus.className = "status info";
+          disconnectFromServer();
+        }
       });
 
       // Function to update progress UI
@@ -854,13 +860,14 @@
               message: message,
             };
             state.socket.send(JSON.stringify(msgObj));
+            // Immediately clear the input after sending
+            chatInput.value = "";
             // Add to chat log as 'sent'
             chatLog.push({ role: "sent", text: message });
             renderChatLog();
             // Add to debug log
             debugLog.push(`[SENT] ${JSON.stringify(msgObj)}`);
             renderDebugLog();
-            chatInput.value = "";
           }
         });
         chatInput.addEventListener("keydown", (e) => {
