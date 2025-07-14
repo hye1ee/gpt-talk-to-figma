@@ -1,0 +1,24 @@
+{
+  "name": "test-plugin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "socket": "npm run build && node dist/socket.js",
+    "server": "npm run build && node dist/llm_server/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^24.0.13",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@types/ws": "^8.18.1",
+    "dotenv": "^17.2.0",
+    "openai": "^5.9.0",
+    "ws": "^8.18.3"
+  }
+}
