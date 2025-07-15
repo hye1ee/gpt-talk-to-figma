@@ -8,6 +8,8 @@ This project enables **Figma plugins** to communicate with a **local server** th
 
 ## 1. Initial Setup 📝
 
+TODO: Sox installation
+
 1. **Install dependencies:**
    ```bash
    npm install

@@ -2,6 +2,7 @@ import http from "http";
 import WebSocket, { WebSocketServer } from "ws";
 import type { IncomingMessage } from "http";
 import dotenv from "dotenv";
+import { isMessageType } from "./types";
 
 dotenv.config();
 
@@ -112,9 +113,8 @@ wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
         });
         return;
       }
-
       // Handle regular messages
-      if (data.type === "message") {
+      if (isMessageType(data.type)) {
         const channelName = data.channel;
         if (!channelName || typeof channelName !== "string") {
           ws.send(
@@ -141,7 +141,7 @@ wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
             console.log("Broadcasting message to client:", data.message);
             client.send(
               JSON.stringify({
-                type: "broadcast",
+                type: data.type,
                 message: data.message,
                 sender: client === ws ? "You" : "User",
                 channel: channelName,

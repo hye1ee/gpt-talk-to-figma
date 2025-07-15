@@ -344,6 +344,20 @@
             style="flex: 1"
           />
           <button id="chat-send" class="primary">Send</button>
+          <button
+            id="voice-record"
+            class="secondary"
+            title="Start voice chat"
+            style="
+              width: 40px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              padding: 0;
+            "
+          >
+            <span id="voice-record-icon">🎤</span>
+          </button>
         </div>
       </div>
 
@@ -392,6 +406,9 @@
       const progressMessage = document.getElementById("progress-message");
       const progressStatus = document.getElementById("progress-status");
       const progressPercentage = document.getElementById("progress-percentage");
+
+      // Track interim voice message DOM element
+      let interimVoiceMsgDiv = null;
 
       // Initialize UI
       function updateConnectionStatus(isConnected, message) {
@@ -446,10 +463,52 @@
           state.socket.onmessage = (event) => {
             try {
               const data = JSON.parse(event.data);
+              const chatMessages = document.getElementById("chat-messages");
+
               console.log("Received message:", data);
 
+              // Also show all received messages in the debug-messages section
+              const debugMessages = document.getElementById("debug-messages");
+              if (debugMessages) {
+                const debugDiv = document.createElement("div");
+                debugDiv.textContent = `[RECV] ${JSON.stringify(data)}`;
+                debugMessages.appendChild(debugDiv);
+                debugMessages.scrollTop = debugMessages.scrollHeight;
+              }
+
+              // Handle voicechat-interim and voicechat-final
+              if (data.type === "voicechat-interim") {
+                // Show interim as a temporary chat message (as if sent by user)
+                if (!interimVoiceMsgDiv) {
+                  interimVoiceMsgDiv = document.createElement("div");
+                  interimVoiceMsgDiv.className = "chat-message sent";
+                  chatMessages.appendChild(interimVoiceMsgDiv);
+                }
+                interimVoiceMsgDiv.textContent = data.message;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                return;
+              }
+              if (data.type === "voicechat-final") {
+                // Replace interim with final, then propagate as a normal sent message
+                if (interimVoiceMsgDiv?.parentNode) {
+                  interimVoiceMsgDiv.parentNode.removeChild(interimVoiceMsgDiv);
+                  interimVoiceMsgDiv = null;
+                }
+
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                // Propagate as if user typed (send to socket as a normal message)
+                if (state.connected && state.socket) {
+                  const msgObj = {
+                    type: "message",
+                    channel: data.channel,
+                    message: data.message,
+                  };
+                  state.socket.send(JSON.stringify(msgObj));
+                }
+                return;
+              }
+
               // Show only 'message' entity in the chat log, and align by sender
-              const chatMessages = document.getElementById("chat-messages");
               if (
                 chatMessages &&
                 (data.type === "broadcast" || data.type === "message")
@@ -469,15 +528,6 @@
                   chatMessages.appendChild(msgDiv);
                   chatMessages.scrollTop = chatMessages.scrollHeight;
                 }
-              }
-
-              // Also show all received messages in the debug-messages section
-              const debugMessages = document.getElementById("debug-messages");
-              if (debugMessages) {
-                const debugDiv = document.createElement("div");
-                debugDiv.textContent = `[RECV] ${JSON.stringify(data)}`;
-                debugMessages.appendChild(debugDiv);
-                debugMessages.scrollTop = debugMessages.scrollHeight;
               }
 
               if (data.type === "system") {
@@ -873,6 +923,63 @@
         chatInput.addEventListener("keydown", (e) => {
           if (e.key === "Enter") {
             chatSend.click();
+          }
+        });
+      }
+      // Voice chat trigger logic (no local recording)
+      let isVoiceChatting = false;
+      const voiceRecordBtn = document.getElementById("voice-record");
+      const voiceRecordIcon = document.getElementById("voice-record-icon");
+      if (voiceRecordBtn) {
+        voiceRecordBtn.addEventListener("click", () => {
+          if (!state.connected || !state.socket) {
+            alert("Not connected to server");
+            return;
+          }
+          if (!isVoiceChatting) {
+            // Start voice chat
+            const msgObj = {
+              type: "voicechat-start",
+              channel: state.channel,
+            };
+            state.socket.send(JSON.stringify(msgObj));
+            isVoiceChatting = true;
+            voiceRecordIcon.textContent = "⏹️";
+            voiceRecordBtn.classList.add("primary");
+            voiceRecordBtn.classList.remove("secondary");
+            voiceRecordBtn.title = "End voice chat";
+            debugLog.push(`[SENT] ${JSON.stringify(msgObj)}`);
+            renderDebugLog();
+          } else {
+            // End voice chat
+            const msgObj = {
+              type: "voicechat-end",
+              channel: state.channel,
+            };
+            state.socket.send(JSON.stringify(msgObj));
+            isVoiceChatting = false;
+            voiceRecordIcon.textContent = "🎤";
+            voiceRecordBtn.classList.remove("primary");
+            voiceRecordBtn.classList.add("secondary");
+            voiceRecordBtn.title = "Start voice chat";
+            debugLog.push(`[SENT] ${JSON.stringify(msgObj)}`);
+            renderDebugLog();
+          }
+        });
+        // Add spacebar trigger
+        window.addEventListener("keydown", (e) => {
+          // Only trigger if spacebar is pressed and not focused on input/textarea/button
+          if (
+            e.code === "Space" &&
+            !(
+              document.activeElement &&
+              (document.activeElement.tagName === "INPUT" ||
+                document.activeElement.tagName === "TEXTAREA" ||
+                document.activeElement.isContentEditable)
+            )
+          ) {
+            e.preventDefault();
+            voiceRecordBtn.click();
           }
         });
       }

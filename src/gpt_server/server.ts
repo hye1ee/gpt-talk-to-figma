@@ -1,6 +1,7 @@
 import WebSocket from "ws";
 import { OpenAI } from "openai";
 import dotenv from "dotenv";
+import { startStreaming, stopStreaming } from './streaming';
 
 dotenv.config();
 
@@ -43,7 +44,7 @@ function connectToSocketServer() {
     try {
       const msg = JSON.parse(data.toString());
       logger.info(`Received message: ${JSON.stringify(msg)}`);
-      if (msg.type === "broadcast" && msg.message && msg.sender === "User") {
+      if (msg.type === "message" && msg.message && msg.sender === "User") {
         // Send to GPT and return answer
         let gptAnswer = "[No answer]";
         try {
@@ -66,6 +67,12 @@ function connectToSocketServer() {
             message: gptAnswer,
           })
         );
+      } else if (msg.type === "voicechat-start" && ws) {
+        logger.info("Start STT streaming");
+        startStreaming(ws, msg.channel);
+      } else if (msg.type === "voicechat-end") {
+        logger.info("Stop STT streaming");
+        stopStreaming();
       }
     } catch (err) {
       logger.error(`Error handling message: ${err}`);
