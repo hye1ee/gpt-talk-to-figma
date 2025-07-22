@@ -22,9 +22,10 @@ export const createTools: OpenAI.Responses.Tool[] = [
             b: { type: "number", minimum: 0, maximum: 1 },
             a: { type: "number", minimum: 0, maximum: 1, nullable: true },
           },
-          required: ["r", "g", "b"],
+          required: ["r", "g", "b", "a"],
           description: "Solid fill in RGBA (defaults to transparent)",
-          nullable: true
+          nullable: true,
+          additionalProperties: false,
         },
         strokeColor: {
           type: "object",
@@ -34,9 +35,10 @@ export const createTools: OpenAI.Responses.Tool[] = [
             b: { type: "number", minimum: 0, maximum: 1 },
             a: { type: "number", minimum: 0, maximum: 1, nullable: true },
           },
-          required: ["r", "g", "b"],
+          required: ["r", "g", "b", "a"],
           description: "Stroke color in RGBA",
-          nullable: true
+          nullable: true,
+          additionalProperties: false,
         },
         strokeWeight: { type: "number", minimum: 0, description: "Stroke weight in px (defaults 1)", nullable: true },
         cornerRadius: { type: "number", minimum: 0, description: "Uniform corner radius in px", nullable: true },
@@ -67,9 +69,10 @@ export const createTools: OpenAI.Responses.Tool[] = [
             b: { type: "number", minimum: 0, maximum: 1 },
             a: { type: "number", minimum: 0, maximum: 1, nullable: true },
           },
-          required: ["r", "g", "b"],
+          required: ["r", "g", "b", "a"],
           description: "Fill color in RGBA format",
-          nullable: true
+          nullable: true,
+          additionalProperties: false,
         },
         strokeColor: {
           type: "object",
@@ -79,9 +82,10 @@ export const createTools: OpenAI.Responses.Tool[] = [
             b: { type: "number", minimum: 0, maximum: 1 },
             a: { type: "number", minimum: 0, maximum: 1, nullable: true },
           },
-          required: ["r", "g", "b"],
+          required: ["r", "g", "b", "a"],
           description: "Stroke color in RGBA format",
-          nullable: true
+          nullable: true,
+          additionalProperties: false,
         },
         strokeWeight: { type: "number", minimum: 0, description: "Stroke weight in pixel value", nullable: true },
         layoutMode: { type: "string", enum: ["NONE", "HORIZONTAL", "VERTICAL"], description: "Auto-layout mode for the frame", nullable: true },
@@ -124,9 +128,10 @@ export const createTools: OpenAI.Responses.Tool[] = [
             b: { type: "number", minimum: 0, maximum: 1 },
             a: { type: "number", minimum: 0, maximum: 1, nullable: true },
           },
-          required: ["r", "g", "b"],
+          required: ["r", "g", "b", "a"],
           description: "Text color (RGBA)",
-          nullable: true
+          nullable: true,
+          additionalProperties: false,
         },
         textAlignHorizontal: { type: "string", enum: ["LEFT", "CENTER", "RIGHT", "JUSTIFIED"], description: "Horizontal text alignment (Default value: LEFT)", nullable: true },
         textAlignVertical: { type: "string", enum: ["TOP", "CENTER", "BOTTOM"], description: "Vertical text alignment (Default value: TOP)", nullable: true },
@@ -151,9 +156,9 @@ export const createTools: OpenAI.Responses.Tool[] = [
         parentId: { type: "string", description: "A parent node (FRAME, GROUP, and SECTION type only) ID to append the node to", nullable: true },
       },
       required: ["svg", "name", "x", "y"],
-      additionalProperties: false
+      additionalProperties: false,
     },
-    strict: true
+    strict: true,
   },
   {
     type: "function",
@@ -176,9 +181,10 @@ export const createTools: OpenAI.Responses.Tool[] = [
             b: { type: "number", minimum: 0, maximum: 1 },
             a: { type: "number", minimum: 0, maximum: 1, nullable: true },
           },
-          required: ["r", "g", "b"],
+          required: ["r", "g", "b", "a"],
           description: "Fill color of the node in RGBA format",
-          nullable: true
+          nullable: true,
+          additionalProperties: false,
         },
         strokeColor: {
           type: "object",
@@ -188,9 +194,10 @@ export const createTools: OpenAI.Responses.Tool[] = [
             b: { type: "number", minimum: 0, maximum: 1 },
             a: { type: "number", minimum: 0, maximum: 1, nullable: true },
           },
-          required: ["r", "g", "b"],
+          required: ["r", "g", "b", "a"],
           description: "Stroke color of the node in RGBA format",
-          nullable: true
+          nullable: true,
+          additionalProperties: false,
         },
         strokeWeight: { type: "number", minimum: 0, description: "Stroke weight of the node in pixel value", nullable: true },
       },
@@ -221,9 +228,10 @@ export const createTools: OpenAI.Responses.Tool[] = [
             b: { type: "number", minimum: 0, maximum: 1 },
             a: { type: "number", minimum: 0, maximum: 1, nullable: true },
           },
-          required: ["r", "g", "b"],
+          required: ["r", "g", "b", "a"],
           description: "Fill color of the node in RGBA format",
-          nullable: true
+          nullable: true,
+          additionalProperties: false,
         },
         strokeColor: {
           type: "object",
@@ -233,9 +241,10 @@ export const createTools: OpenAI.Responses.Tool[] = [
             b: { type: "number", minimum: 0, maximum: 1 },
             a: { type: "number", minimum: 0, maximum: 1, nullable: true },
           },
-          required: ["r", "g", "b"],
+          required: ["r", "g", "b", "a"],
           description: "Stroke color of the node in RGBA format",
-          nullable: true
+          nullable: true,
+          additionalProperties: false,
         },
         strokeWeight: { type: "number", minimum: 0, description: "Stroke weight of the node in pixel value", nullable: true },
       },
@@ -267,9 +276,10 @@ export const createTools: OpenAI.Responses.Tool[] = [
             b: { type: "number", minimum: 0, maximum: 1 },
             a: { type: "number", minimum: 0, maximum: 1, nullable: true },
           },
-          required: ["r", "g", "b"],
+          required: ["r", "g", "b", "a"],
           description: "Fill color of the node in RGBA format",
-          nullable: true
+          nullable: true,
+          additionalProperties: false,
         },
         strokeColor: {
           type: "object",
@@ -279,9 +289,10 @@ export const createTools: OpenAI.Responses.Tool[] = [
             b: { type: "number", minimum: 0, maximum: 1 },
             a: { type: "number", minimum: 0, maximum: 1, nullable: true },
           },
-          required: ["r", "g", "b"],
+          required: ["r", "g", "b", "a"],
           description: "Stroke color of the node in RGBA format",
-          nullable: true
+          nullable: true,
+          additionalProperties: false,
         },
         strokeWeight: { type: "number", minimum: 0, description: "Stroke weight of the node in pixel value", nullable: true },
       },
@@ -311,18 +322,19 @@ export const createTools: OpenAI.Responses.Tool[] = [
             b: { type: "number", minimum: 0, maximum: 1 },
             a: { type: "number", minimum: 0, maximum: 1, nullable: true },
           },
-          required: ["r", "g", "b"],
+          required: ["r", "g", "b", "a"],
           description: "Stroke color of the node in RGBA format",
-          nullable: true
+          nullable: true,
+          additionalProperties: false,
         },
         strokeWeight: { type: "number", minimum: 0, description: "Stroke weight of the node in pixel value", nullable: true },
         strokeCap: { type: "string", enum: ["NONE", "ROUND", "SQUARE"], description: "Line-end cap style (e.g., NONE, ROUND, or SQUARE)", nullable: true },
         dashPattern: { type: "array", items: { type: "number", minimum: 0 }, minItems: 2, maxItems: 2, description: "[dash, gap] in px (e.g., [4, 2] for a dashed line)", nullable: true },
       },
       required: ["startX", "startY", "endX", "endY", "name"],
-      additionalProperties: false
+      additionalProperties: false,
     },
-    strict: true
+    strict: true,
   },
   {
     type: "function",
@@ -336,8 +348,8 @@ export const createTools: OpenAI.Responses.Tool[] = [
         groupName: { type: "string", description: "Semantic name for the mask group", nullable: true },
       },
       required: ["maskNodeId", "contentNodeIds"],
-      additionalProperties: false
+      additionalProperties: false,
     },
-    strict: true
+    strict: true,
   },
 ];

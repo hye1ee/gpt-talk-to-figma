@@ -480,55 +480,58 @@
               }
 
               switch (data.type) {
-                case "voicechat-interim":
-                  // Show interim as a temporary chat message (as if sent by user)
-                  if (!interimVoiceMsgDiv) {
-                    interimVoiceMsgDiv = document.createElement("div");
-                    interimVoiceMsgDiv.className = "chat-message sent";
-                    chatMessages.appendChild(interimVoiceMsgDiv);
-                  }
-                  interimVoiceMsgDiv.textContent = data.message;
-                  chatMessages.scrollTop = chatMessages.scrollHeight;
-                  return;
-                case "voicechat-final":
-                  // Replace interim with final, then propagate as a normal sent message
-                  if (interimVoiceMsgDiv?.parentNode) {
-                    interimVoiceMsgDiv.parentNode.removeChild(
-                      interimVoiceMsgDiv
-                    );
-                    interimVoiceMsgDiv = null;
-                  }
-                  chatMessages.scrollTop = chatMessages.scrollHeight;
+                case "client":
+                  switch (data.event) {
+                    case "voicechat-interim":
+                      // Show interim as a temporary chat message (as if sent by user)
+                      if (!interimVoiceMsgDiv) {
+                        interimVoiceMsgDiv = document.createElement("div");
+                        interimVoiceMsgDiv.className = "chat-message sent";
+                        chatMessages.appendChild(interimVoiceMsgDiv);
+                      }
+                      interimVoiceMsgDiv.textContent = data.message;
+                      chatMessages.scrollTop = chatMessages.scrollHeight;
+                      return;
+                    case "voicechat-final":
+                      // Replace interim with final, then propagate as a normal sent message
+                      if (interimVoiceMsgDiv?.parentNode) {
+                        interimVoiceMsgDiv.parentNode.removeChild(
+                          interimVoiceMsgDiv
+                        );
+                        interimVoiceMsgDiv = null;
+                      }
+                      chatMessages.scrollTop = chatMessages.scrollHeight;
 
-                  // Propagate as if user typed (send to socket as a normal message)
-                  if (state.connected && state.socket) {
-                    const msgObj = {
-                      id: data.id,
-                      sender: "User",
-                      type: "client",
-                      event: "text",
-                      channel: state.channel,
-                      message: data.message.result,
-                    };
-                    state.socket.send(JSON.stringify(msgObj));
+                      // Propagate as if user typed (send to socket as a normal message)
+                      if (state.connected && state.socket) {
+                        const msgObj = {
+                          id: data.id,
+                          sender: "User",
+                          type: "client",
+                          event: "text",
+                          channel: state.channel,
+                          message: data.message.result,
+                        };
+                        state.socket.send(JSON.stringify(msgObj));
+                      }
+                      return;
+                    case "text":
+                      // Show only 'message' entity in the chat log, and align by sender
+                      if (chatMessages && data.message) {
+                        const msgDiv = document.createElement("div");
+                        // If message is an object with sender, use that, else treat as string
+                        if (data.sender === "User") {
+                          msgDiv.className = "chat-message sent";
+                          msgDiv.textContent = data.message;
+                        } else {
+                          msgDiv.className = "chat-message received";
+                          msgDiv.textContent = data.message;
+                        }
+                        chatMessages.appendChild(msgDiv);
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                      }
+                      break;
                   }
-                  return;
-                case "text":
-                  // Show only 'message' entity in the chat log, and align by sender
-                  if (chatMessages && data.message) {
-                    const msgDiv = document.createElement("div");
-                    // If message is an object with sender, use that, else treat as string
-                    if (data.sender === "User") {
-                      msgDiv.className = "chat-message sent";
-                      msgDiv.textContent = data.message;
-                    } else {
-                      msgDiv.className = "chat-message received";
-                      msgDiv.textContent = data.message;
-                    }
-                    chatMessages.appendChild(msgDiv);
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                  }
-                  break;
                 case "tool":
                   // Show tool message in the chat log
                   if (chatMessages && data.message) {

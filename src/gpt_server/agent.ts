@@ -34,7 +34,7 @@ class Agent {
         input: [
           { role: "user", content: message }
         ],
-        tools: createTools
+        // tools: createTools
       });
       return response.output;
     } catch (err) {
