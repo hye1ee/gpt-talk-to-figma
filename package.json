@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "socket": "npm run build && node dist/socket.js",
-    "server": "npm run build && node dist/gpt_server/server.js"
+    "server": "npm run build && node dist/gpt_server/index.js"
   },
   "docs": {
     "server": "You can pass --channel=<name> to join a specific channel, e.g., npm run server -- --channel=mychannel"
@@ -24,6 +24,7 @@
     "dotenv": "^17.2.0",
     "node-record-lpcm16": "^1.0.1",
     "openai": "^5.9.0",
+    "uuid": "^11.1.0",
     "ws": "^8.18.3"
   }
 }
